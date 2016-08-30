@@ -1,0 +1,28 @@
+#!/bin/sh
+
+mkdir build
+
+######## ENTER PATH TO YOUR JAVA, JAVAC AND JAR BINARIES HERE
+java="java"
+javac="javac"
+jar="jar"
+
+echo "COMPILING JAVA CLASSES..."
+$javac -d build -classpath '.:lib/:lib/*' `find . -name *.java`
+
+cd build
+if [ "$?" -eq "0" ]; then
+	echo "BUILDING JAR FILE (with manifest)..."
+	echo "Main-class: main.Main" > manifest.mf
+	cp -r -f ../lib/ctries2 ./
+	$jar cfm experiments.jar manifest.mf *
+	rm -r -f ctries2
+	
+	if [ "$?" -eq "0" ]; then
+		cd ../lib
+		echo "INSTRUMENTING JAR FILE WITH STM SUPPORT..."
+		$java -jar deuceAgent.jar ../build/experiments.jar ../build/experiments_instr.jar
+		cd ..
+	fi
+fi
+echo "DONE."

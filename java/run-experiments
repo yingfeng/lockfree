@@ -1,0 +1,151 @@
+#!/bin/bash
+
+######## ENTER PATH TO YOUR JAVA BINARY HERE
+java="java"
+
+threadcounts="1 2 4 8"
+trials=8
+sec=5
+
+cd build
+opts="-server -d64 -Xms3G -Xmx3G -Xbootclasspath/p:'../lib/scala-library.jar:../lib/deuceAgent.jar'"
+command="$java $opts -jar experiments_instr.jar"
+
+dt=`date`
+echo $dt
+echo $dt > run.log
+
+## LOOP THROUGH ALL EXPERIMENTS TWICE; THE FIRST TIME COUNTING THEM, AND THE SECOND TIME PERFORMING THEM
+for counting in 0 1
+do
+    i=0
+
+    if [ "$counting" -eq "0" ]
+    then 
+        echo "Counting experiments..."
+    else
+        printf "\n"
+        st=$SECONDS
+    fi
+
+    ## ALL EXPERIMENTS FOR NON-STM DATA STRUCTURES
+    for keysratio in 10000_50_50 10000_0_0 10000_20_10 100_50_50 100_0_0 100_20_10 1000000_50_50 1000000_0_0 1000000_20_10 
+    do
+        for threads in $threadcounts
+        do
+            for algs in RBLock_ SkipList_ AVL_ SkipTree_ Chromatic_0 Chromatic_6
+            do
+                alg=`echo $algs | cut -f1 -d"_"`
+                param=`echo $algs | cut -f2 -d"_"`
+                keys=`echo $keysratio | cut -f1 -d"_"`
+                ins=`echo $keysratio | cut -f2 -d"_"`
+                del=`echo $keysratio | cut -f3 -d"_"`
+                i=`expr $i + 1`
+
+                if [ "$counting" -eq "0" ]; then echo "$i"; continue; fi
+
+                if [ "$param" != "" ]; then
+                    param="-param-$param"
+                else
+                    param=""
+                fi
+                args="$threads $trials $sec $alg $param -ins$ins -del$del -keys$keys -prefill -file-data-trials$i.csv"
+                echo -n "ex$i: "
+                echo "$command $args"
+                $command $args
+                top -n 1 > top-trials$i.log
+
+                elapsed=`expr $SECONDS - $st`
+                avg=`expr $elapsed / $i + 1`
+                expleft=`expr $maxi - $i`
+                secleft=`expr $expleft \* $avg`
+                msg="  after ${elapsed}s, $i finished (${avg}s each) and $expleft remaining (expected ${secleft}s)"
+                echo $msg
+                echo $msg >> run.log
+            done
+        done
+    done
+
+    ## ALL EXPERIMENTS FOR STM BASED SKIP LIST
+    for keysratio in 1000000_20_10 1000000_50_50 1000000_0_0 10000_50_50 10000_0_0 10000_20_10 100_50_50 100_0_0 100_20_10
+    do
+        for threads in $threadcounts
+        do
+            for algs in SkipListSTM_
+            do
+                alg=`echo $algs | cut -f1 -d"_"`
+                param=`echo $algs | cut -f2 -d"_"`
+                keys=`echo $keysratio | cut -f1 -d"_"`
+                ins=`echo $keysratio | cut -f2 -d"_"`
+                del=`echo $keysratio | cut -f3 -d"_"`
+                i=`expr $i + 1`
+
+                if [ "$counting" -eq "0" ]; then echo "$i"; continue; fi
+
+                if [ "$param" != "" ]; then
+                    param="-param-$param"
+                else
+                    param=""
+                fi
+                args="$threads $trials $sec $alg $param -ins$ins -del$del -keys$keys -prefill -file-data-trials$i.csv"
+                echo -n "ex$i: "
+                echo "$command $args"
+                $command $args
+                top -n 1 > top-trials$i.log
+
+                elapsed=$SECONDS
+                avg=`expr $elapsed / $i + 1`
+                expleft=`expr $maxi - $i`
+                secleft=`expr $expleft \* $avg`
+                msg="  after ${elapsed}s, $i finished (${avg}s each) and $expleft remaining (expected ${secleft}s)"
+                echo $msg
+                echo $msg >> run.log
+            done
+        done
+    done
+    
+    ## KEY RANGES 100 AND 10000 FOR STM BASED RED BLACK TREE
+    ## (we never run range 1000000, because RBSTM is so horrendously slow that it takes minutes to simply prefill the tree.)
+    for keysratio in 10000_20_10 10000_0_0 10000_50_50 100_50_50 100_0_0 100_20_10
+    do
+        for threads in $threadcounts
+        do
+            for algs in RBSTM_
+            do
+                alg=`echo $algs | cut -f1 -d"_"`
+                param=`echo $algs | cut -f2 -d"_"`
+                keys=`echo $keysratio | cut -f1 -d"_"`
+                ins=`echo $keysratio | cut -f2 -d"_"`
+                del=`echo $keysratio | cut -f3 -d"_"`
+                i=`expr $i + 1`
+
+                if [ "$counting" -eq "0" ]; then echo "$i"; continue; fi
+
+                if [ "$param" != "" ]; then
+                    param="-param-$param"
+                else
+                    param=""
+                fi
+                args="$threads $trials $sec $alg $param -ins$ins -del$del -keys$keys -prefill -file-data-trials$i.csv"
+                echo -n "ex$i: "
+                echo "$command $args"
+                $command $args
+                top -n 1 > top-trials$i.log
+
+                elapsed=$SECONDS
+                avg=`expr $elapsed / $i + 1`
+                expleft=`expr $maxi - $i`
+                secleft=`expr $expleft \* $avg`
+                msg="  after ${elapsed}s, $i finished (${avg}s each) and $expleft remaining (expected ${secleft}s)"
+                echo $msg
+                echo $msg >> run.log
+            done
+        done
+    done
+
+maxi=$i
+done
+
+dt=`date`
+echo $dt
+echo $dt >> run.log
