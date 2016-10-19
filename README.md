@@ -28,24 +28,23 @@ A repository of some of my data structure implementations in Java and C++, and t
 * Path: java/src/algorithms/published/LockFreeKSTRQ*
 * Optimized version for k=4 with no range query operation: java/src/algorithms/published/LockFree4ST*
 
+### Java test harness ###
 
+* Comes with support for a large number of data structure implementations
+* Supports range queries for some data structures
+* See README in java/
 
-### How do I get set up? ###
+### C++ test harness ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* Can easily swap in several memory allocation and reclamation schemes
+* Comes with support for the lock-free BST and Chromatic trees
+* See README in cpp/debra/
 
-### Contribution guidelines ###
+### The DEBRA(+) memory reclamation algorithm ###
 
-* Writing tests
-* Code review
-* Other guidelines
+* See README in cpp/debra/
 
-### Who do I talk to? ###
+### Repository contact ###
 
-* Repo owner or admin
-* Other community or team contact
+Trevor Brown
+trbot86 at gmail dot com
