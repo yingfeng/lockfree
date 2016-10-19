@@ -1,12 +1,13 @@
-# README #
+# Concurrent data structures #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+A repository of some of my data structure implementations in Java and C++, and test harnesses for running microbenchmarks.
 
-### What is this repository for? ###
+### Lock-free chromatic tree ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Available for both Java and C++
+* C++ version has various memory reclamation options implemented, including hazard pointers, DEBRA and DEBRA+. 
+* Path to Java version: java/src/algorithms/published/ConcurrentChromaticTreeMap*
+* Path to C++ version: cpp/debra/chromatic*
 
 ### How do I get set up? ###
 
