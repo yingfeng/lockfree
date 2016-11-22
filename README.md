@@ -47,4 +47,4 @@ A repository of some of my data structure implementations in Java and C++, and t
 ### Repository contact ###
 
 Trevor Brown
-trbot86 at gmail dot com
+me at tbrown dot pro
