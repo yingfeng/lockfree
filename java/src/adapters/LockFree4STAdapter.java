@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,78 +19,7 @@
 
 package adapters;
 
-//import main.support.BBSTInterface;
-//import main.support.KSTNode;
-//import main.support.OperationListener;
-//import main.support.Random;
-//import algorithms.dev.kst.LockFree4ST;
-//
-///**
-// *
-// * @author trev
-// */
-//public class LockFree4STAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
-//    LockFree4ST<K,K> tree = new LockFree4ST<K,K>();
-//
-//    public boolean contains(K key) {
-//        return tree.containsKey(key);
-//    }
-//    
-//    public boolean add(K key, Random rng) {
-//        return add(key, rng, null);
-//    }
-//
-//    public boolean add(K key, Random rng, final int[] metrics) {
-//        tree.put(key, key);
-//        return true;
-//    }
-//
-//    public K get(K key) {
-//        return tree.get(key);
-//    }
-//
-//    public boolean remove(K key, Random rng) {
-//        return remove(key, rng, null);
-//    }
-//
-//    public boolean remove(K key, Random rng, final int[] metrics) {
-//        return tree.remove(key) != null;
-//    }
-//
-//    public void addListener(OperationListener l) {
-//        tree.addListener(l);
-//    }
-//
-//    public int size() {
-//        return tree.size();
-//    }
-//
-//    public KSTNode<K> getRoot() {
-//        return tree.getRoot();
-//    }
-//
-//    public int getSumOfDepths() {
-//        return tree.getSumOfDepths();
-//    }
-//
-//    public int sequentialSize() {
-//        return tree.sequentialSize();
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return tree.toString();
-//    }
-//
-//}
-
-
-
-
-
-
-
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -100,8 +29,8 @@ import algorithms.published.LockFree4ST;
  *
  * @author trev
  */
-public class LockFree4STAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
-    LockFree4ST<K,K> tree = new LockFree4ST<K,K>();
+public class LockFree4STAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
+    LockFree4ST<K,K> tree = new LockFree4ST<>();
 
     public boolean contains(K key) {
         return tree.containsKey(key);
@@ -112,8 +41,8 @@ public class LockFree4STAdapter<K extends Comparable<? super K>> extends Abstrac
     }
 
     public boolean add(K key, Random rng, final int[] metrics) {
-        return tree.putIfAbsent(key, key) == null;
-        //tree.put(key, key); return true;
+//        return tree.putIfAbsent(key, key) == null;
+        return tree.put(key, key) == null;
     }
 
     public K get(K key) {

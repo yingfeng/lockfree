@@ -3,7 +3,7 @@ package algorithms.published;
 /**
  * Implementation of dictionary ADT with a non-blocking chromatic search tree.
  * Copyright (C) 2013 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot] edu) with questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with questions or comments.
  *
  * Details of the chromatic search tree algorithm appear in the paper:
  *    "A general technique for non-blocking trees"
@@ -57,25 +57,25 @@ package algorithms.published;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-public class ConcurrentChromaticTreeMap<K,V> {
+public class LockFreeChromaticMap<K,V> {
     private final int d; // this is the number of violations to allow on a search path before we fix everything on it. if d is zero, then each update fixes any violation it created before returning.
     private static final int DEFAULT_d = 6; // experimentally determined to yield good performance for both random workloads, and operations on sorted sequences
     private final Node root;
     private final Operation dummy;
     private final Comparator<? super K> comparator;
-    private final AtomicReferenceFieldUpdater<ConcurrentChromaticTreeMap.Node, ConcurrentChromaticTreeMap.Operation> updateOp;
-    private final AtomicReferenceFieldUpdater<ConcurrentChromaticTreeMap.Node, ConcurrentChromaticTreeMap.Node> updateLeft, updateRight;
+    private final AtomicReferenceFieldUpdater<LockFreeChromaticMap.Node, LockFreeChromaticMap.Operation> updateOp;
+    private final AtomicReferenceFieldUpdater<LockFreeChromaticMap.Node, LockFreeChromaticMap.Node> updateLeft, updateRight;
     
-    public ConcurrentChromaticTreeMap() {
+    public LockFreeChromaticMap() {
         this(DEFAULT_d, null); 
     }
-    public ConcurrentChromaticTreeMap(final Comparator<? super K> cmp) {
+    public LockFreeChromaticMap(final Comparator<? super K> cmp) {
         this(DEFAULT_d, cmp);
     }
-    public ConcurrentChromaticTreeMap(final int allowedViolationsPerPath) {
+    public LockFreeChromaticMap(final int allowedViolationsPerPath) {
         this(allowedViolationsPerPath, null);
     }
-    public ConcurrentChromaticTreeMap(final int allowedViolationsPerPath, final Comparator<? super K> cmp) {
+    public LockFreeChromaticMap(final int allowedViolationsPerPath, final Comparator<? super K> cmp) {
         d = allowedViolationsPerPath;
         comparator = cmp;
         dummy = new Operation();

@@ -19,46 +19,46 @@
 
 package adapters;
 
+import algorithms.published.LockFreeBSlackTreeMap;
 import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
-import algorithms.published.LockFreeRelaxedAVLMap;
 
 /**
  *
  * @author trev
  */
-public class LockFreeAVLAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
-    public LockFreeRelaxedAVLMap<K,K> tree;
+public class LockFreeBSlackTreeAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
+    public LockFreeBSlackTreeMap<K,K> tree;
 
-    public LockFreeAVLAdapter() {
-        tree = new LockFreeRelaxedAVLMap();
+    public LockFreeBSlackTreeAdapter() {
+        tree = new LockFreeBSlackTreeMap<>((K) (Integer) 0 /* any key */);
     }
 
-    public LockFreeAVLAdapter(final int allowedViolations) {
-        tree = new LockFreeRelaxedAVLMap(allowedViolations);
-    }
-
-    public boolean contains(K key) {
-        return tree.containsKey(key);
+    public LockFreeBSlackTreeAdapter(final int nodeCapacity) {
+        tree = new LockFreeBSlackTreeMap<>(nodeCapacity, (K) (Integer) 0 /* any key */);
     }
     
-    public boolean add(K key, Random rng) {
-//        return tree.putIfAbsent(key, key) == null;
+    public boolean contains(final K key) {
+        return tree.containsKey(key);
+    }
+
+    public boolean add(final K key, final Random rng) {
         return tree.put(key, key) == null;
+//        return tree.putIfAbsent(key, key);
     }
 
     public K get(K key) {
         return tree.get(key);
     }
 
-    public boolean remove(K key, Random rng) {
+    public boolean remove(final K key, final Random rng) {
         return tree.remove(key) != null;
     }
 
     public void addListener(OperationListener l) {
-        
+
     }
 
     public int size() {
@@ -66,28 +66,29 @@ public class LockFreeAVLAdapter<K extends Comparable<? super K>> extends Abstrac
     }
 
     public KSTNode<K> getRoot() {
-        return null;
-    }
-    
-    public double getAverageDepth() {
-        return 0;
+        return tree.getRoot();
     }
 
     public int getSumOfDepths() {
-        return 0;
+        return tree.getSumOfKeyDepths();
     }
 
     public int sequentialSize() {
-        return tree.size();
-    }
-
-    public double getRebalanceProbability() {
-        return -1;
-    }
-
-    @Override
-    public String toString() {
-        return tree.toString();
+        return tree.sequentialSize();
     }
     
+    public long getSumOfKeys() {
+        return tree.getSumOfKeys();
+    }
+    
+    public boolean supportsKeysum() {
+        return true;
+    }
+    public long getKeysum() {
+        return tree.getSumOfKeys();
+    }
+    
+    public void debugPrint(){ 
+        tree.debugPrint();
+    }
 }

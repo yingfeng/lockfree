@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 package adapters;
 
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -30,7 +30,7 @@ import java.util.TreeMap;
  *
  * @author trev
  */
-public class TreeMapAdapter<K> extends AbstractAdapter<K> implements BBSTInterface<K>, SequentialStructure {
+public class TreeMapAdapter<K> extends AbstractAdapter<K> implements SetInterface<K>, SequentialStructure {
     TreeMap<K,K> tree = new TreeMap<K,K>();
 
     public boolean contains(final K key) {
@@ -38,9 +38,11 @@ public class TreeMapAdapter<K> extends AbstractAdapter<K> implements BBSTInterfa
     }
 
     public boolean add(final K key, final Random rng) {
-        // WARNING: THIS DOES NOT HAVE PUTIFABSENT!!!!!!!
-        return (tree.containsKey(key) ? false : tree.put(key, key) == null);
-        //tree.put(key, key); return true;
+        return tree.put(key, key) == null;
+        
+//        // WARNING: THIS DOES NOT NATIVELY HAVE PUTIFABSENT
+//        // simulate putIfAbsent
+//        return (tree.containsKey(key) ? false : tree.put(key, key) == null);
     }
 
     public K get(K key) {

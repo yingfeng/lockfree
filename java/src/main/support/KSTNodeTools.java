@@ -26,6 +26,31 @@ import org.deuce.transform.Exclude;
  * @author trev
  */
 @Exclude
-public interface SequentialPrefillStructure {
+public class KSTNodeTools {
 
+    public static <K> double averageKeyDepth(KSTNode<K> root) {
+        return sumOfKeyDepths(root, 0) / (double) countOfKeys(root);
+    }
+
+    private static <K> int countOfKeys(KSTNode<K> root) {
+        if (root == null) return 0;
+        if (root.children == null || root.children.size() == 0) return root.keyCount;
+        int count = 0;
+        for (KSTNode<K> child : root.children) {
+            count += countOfKeys(child);
+        }
+        return count;
+
+    }
+
+    private static <K> int sumOfKeyDepths(KSTNode<K> root, int depth) {
+        if (root == null) return 0;
+        if (root.children == null || root.children.size() == 0) return depth * root.keyCount;
+        int sum = 0;
+        for (KSTNode<K> child : root.children) {
+            if (child != null) sum += sumOfKeyDepths(child, 1+depth);
+        }
+        return sum;
+    }
+    
 }

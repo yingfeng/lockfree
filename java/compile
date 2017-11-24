@@ -1,5 +1,6 @@
 #!/bin/sh
 
+rm -r -f build
 mkdir build
 
 ######## ENTER PATH TO YOUR JAVA, JAVAC AND JAR BINARIES HERE
@@ -8,21 +9,24 @@ javac="javac"
 jar="jar"
 
 echo "COMPILING JAVA CLASSES..."
-$javac -d build -classpath '.:lib/:lib/*' `find . -name *.java`
 
-cd build
+cmd="$javac -d build -classpath lib/ctries2.jar:lib/deuceAgent.jar:lib/scala-library.jar `find . -name *.java`"
+echo $cmd
+$cmd
+
 if [ "$?" -eq "0" ]; then
+	cd build
 	echo "BUILDING JAR FILE (with manifest)..."
 	echo "Main-class: main.Main" > manifest.mf
-	cp -r -f ../lib/ctries2 ./
 	$jar cfm experiments.jar manifest.mf *
-	rm -r -f ctries2
-	
+
 	if [ "$?" -eq "0" ]; then
 		cd ../lib
 		echo "INSTRUMENTING JAR FILE WITH STM SUPPORT..."
 		$java -jar deuceAgent.jar ../build/experiments.jar ../build/experiments_instr.jar
 		cd ..
 	fi
+	echo "DONE."
+else
+	echo "ERROR compiling."
 fi
-echo "DONE."

@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 package adapters;
 
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -31,15 +31,15 @@ import org.deuce.transform.Exclude;
  * @author trev
  */
 @Exclude
-public class OptTreeAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
+public class OptTreeAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
     OptTreeMap<K,K> tree = new OptTreeMap<K,K>();
     public OptTreeAdapter() {
 
     }
 
     public boolean add(final K key, final Random rng) {
-        return tree.putIfAbsent(key, key) == null;
-        //tree.put(key, key); return true;
+//        return tree.putIfAbsent(key, key) == null;
+        return tree.put(key, key) == null;
     }
 
     public K get(K key) {

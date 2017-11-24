@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-public class ConcurrentBSTMap<K extends Comparable<? super K>, V> {
+public class LockFreeBSTMap<K extends Comparable<? super K>, V> {
 
     //--------------------------------------------------------------------------------
     // Class: Node
@@ -110,7 +110,7 @@ public class ConcurrentBSTMap<K extends Comparable<? super K>, V> {
 
     final Node<K,V> root;
 
-    public ConcurrentBSTMap() {
+    public LockFreeBSTMap() {
         // to avoid handling special case when <= 2 nodes,
         // create 2 dummy nodes, both contain key null
         // All real keys inside BST are required to be non-null

@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,14 +42,15 @@ public class Main {
             new ArrayList<TreeFactory<Integer>>();
     static {
         factories.add(new LockFreeChromaticFactory<Integer>());
+        factories.add(new LockFreeBSlackTreeFactory<Integer>());
+        factories.add(new LockFreeAVLFactory<Integer>());
+        factories.add(new LockFree4STFactory<Integer>());
+        factories.add(new LockFreeKSTRQFactory<Integer>());
         factories.add(new SkipListDeuceSTMFactory<Integer>());
         factories.add(new RBTreeDeuceSTMFactory<Integer>());
         factories.add(new RBTreeCoarseLockFactory<Integer>());
         factories.add(new RBTreeUnsyncFactory<Integer>());
         factories.add(new DummyFactory<Integer>());
-        factories.add(new LockFreeAVLFactory<Integer>());
-        factories.add(new LockFree4STFactory<Integer>());
-        factories.add(new LockFreeKSTRQFactory<Integer>());
         factories.add(new OptTreeFactory<Integer>());
         factories.add(new SnapTreeFactory<Integer>());
         factories.add(new SkipListFactory<Integer>());
@@ -65,14 +66,14 @@ public class Main {
     // factory classes for each supported data structure
 
     protected static abstract class TreeFactory<K> {
-        public abstract BBSTInterface<K> newTree(final Object param);
+        public abstract SetInterface<K> newTree(final Object param);
         public abstract String getName();
     }
 
     @Exclude
     protected static class LockFreeChromaticFactory<K> extends TreeFactory<K> {
         Object param;
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             this.param = param;
             if ("".equals(param.toString()) || param == null) {
                 return new LockFreeChromaticAdapter();
@@ -81,10 +82,23 @@ public class Main {
         }
         public String getName() { return "Chromatic"; }
     }
+    
+    @Exclude
+    protected static class LockFreeBSlackTreeFactory<K> extends TreeFactory<K> {
+        Object param;
+        public SetInterface<K> newTree(final Object param) {
+            this.param = param;
+            if ("".equals(param.toString()) || param == null) {
+                return new LockFreeBSlackTreeAdapter();
+            }
+            return new LockFreeBSlackTreeAdapter(Integer.parseInt(param.toString()));
+        }
+        public String getName() { return "ConcurrentBSlack"; }
+    }
 
     @Exclude
     protected static class SkipListDeuceSTMFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new SkipListDeuceSTMAdapter(1.0);
         }
         public String getName() { return "SkipListSTM"; }
@@ -92,7 +106,7 @@ public class Main {
 
     @Exclude
     protected static class RBTreeDeuceSTMFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new RBTreeDeuceSTMAdapter(1.0);
         }
         public String getName() { return "RBSTM"; }
@@ -100,7 +114,7 @@ public class Main {
 
     @Exclude
     protected static class RBTreeCoarseLockFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new RBTreeCoarseLockAdapter(1.0);
         }
         public String getName() { return "RBLock"; }
@@ -108,7 +122,7 @@ public class Main {
 
     @Exclude
     protected static class RBTreeUnsyncFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new RBTreeUnsyncAdapter(1.0);
         }
         public String getName() { return "RBUnsync"; }
@@ -116,7 +130,7 @@ public class Main {
 
     @Exclude
     protected static class DummyFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new DummyAdapter(1.0);
         }
         public String getName() { return "Dummy"; }
@@ -125,7 +139,7 @@ public class Main {
     @Exclude
     protected static class LockFreeAVLFactory<K> extends TreeFactory<K> {
         Object param;
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             this.param = param;
             if ("".equals(param.toString()) || param == null) {
                 return new LockFreeAVLAdapter();
@@ -137,7 +151,7 @@ public class Main {
 
     @Exclude
     protected static class LockFree4STFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new LockFree4STAdapter();
         }
         public String getName() { return "4-ST"; }
@@ -146,7 +160,7 @@ public class Main {
     @Exclude
     protected static class LockFreeKSTRQFactory<K> extends TreeFactory<K> {
         Object param;
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             this.param = param;
             return new LockFreeKSTRQAdapter(Integer.parseInt(param.toString()));
         }
@@ -155,7 +169,7 @@ public class Main {
 
     @Exclude
     protected static class OptTreeFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new OptTreeAdapter();
         }
         public String getName() { return "AVL"; }
@@ -163,7 +177,7 @@ public class Main {
 
     @Exclude
     protected static class SnapTreeFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new SnapTreeAdapter();
         }
         public String getName() { return "Snap"; }
@@ -171,15 +185,15 @@ public class Main {
 
     @Exclude
     protected static class SkipListFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
-            return new SkipListAdapter();
+        public SetInterface<K> newTree(final Object param) {
+            return new ConcurrentSkipListMapAdapter();
         }
         public String getName() { return "SkipList"; }
     }
 
     @Exclude
     protected static class ConcurrentHashMapFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new ConcurrentHashMapAdapter();
         }
         public String getName() { return "ConcurrentHMAP"; }
@@ -187,7 +201,7 @@ public class Main {
 
     @Exclude
     protected static class SkipTreeFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new SkipTreeAdapter();
         }
         public String getName() { return "SkipTree"; }
@@ -195,7 +209,7 @@ public class Main {
 
     @Exclude
     protected static class Ctrie2Factory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new Ctrie2Adapter();
         }
         public String getName() { return "Ctrie"; }
@@ -203,7 +217,7 @@ public class Main {
 
     @Exclude
     protected static class StaticDictionary5Factory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new LockFreeBSTAdapter();
         }
         public String getName() { return "BST"; }
@@ -211,7 +225,7 @@ public class Main {
 
     @Exclude
     protected static class SyncTreeMapFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new SyncTreeMapAdapter();
         }
         public String getName() { return "SyncTMAP"; }
@@ -219,7 +233,7 @@ public class Main {
 
     @Exclude
     protected static class TreeMapFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new TreeMapAdapter();
         }
         public String getName() { return "TMAP"; }
@@ -227,7 +241,7 @@ public class Main {
 
     @Exclude
     protected static class HashMapFactory<K> extends TreeFactory<K> {
-        public BBSTInterface<K> newTree(final Object param) {
+        public SetInterface<K> newTree(final Object param) {
             return new HashMapAdapter();
         }
         public String getName() { return "HMAP"; }
@@ -622,9 +636,13 @@ public class Main {
             long dsKeysum = tree.getKeysum();
             if (dsKeysum != threadsKeysum) {
                 throw new RuntimeException("threadsKeysum=" + threadsKeysum + " does not match dsKeysum=" + dsKeysum);
+            } else {
+                System.out.println("Key checksum validation PASSED (checksum=" + dsKeysum + ").");
+                tree.debugPrint();
             }
         } else {
             // possibly add an unobtrusive warning that checksums are not computed for this data structure
+            System.out.println("NOTICE: the data structure " + tree.getClass().getName() + " does not support key checksum validation.");
         }
         
         // produce output
@@ -653,9 +671,9 @@ public class Main {
             int nnodes = 0;
             double averageDepth = 0;
             if (shouldMeasureTrees) {
-                if (tree instanceof BBSTInterface) {
-                    double depthSum = ((BBSTInterface) tree).getSumOfDepths();
-                    nnodes = ((BBSTInterface) tree).sequentialSize();
+                if (tree instanceof SetInterface) {
+                    double depthSum = ((SetInterface) tree).getSumOfDepths();
+                    nnodes = ((SetInterface) tree).sequentialSize();
                     averageDepth = (depthSum / nnodes);
                 } // otherwise, we don't know what methods it has!
             }
@@ -878,7 +896,7 @@ public class Main {
     
     SizeKeysumPair fillToSteadyState(
             final java.util.Random rand,
-            final BBSTInterface<Integer> tree,
+            final SetInterface<Integer> tree,
             Ratio ratio,
             int maxkey,
             final boolean showProgress) {
@@ -1057,16 +1075,16 @@ public class Main {
         }        
 
         // perform the experiment
-        java.util.Random rng = new java.util.Random((int) switches.get("seed"));
+        Random rng = new Random((int) System.nanoTime()); // switches.get("seed"));
         for (Experiment ex : exp) {
-            int experimentSeed = rng.nextInt();
+            int experimentSeed = rng.nextInt(); //System.nanoTime();
             java.util.Random experimentRng = new java.util.Random(experimentSeed);
 
             // find appropriate factory to produce the tree we want for this trial
             // and run the trial
             for (TreeFactory factory : factories) if (ex.alg.equals(factory.getName())) {
                 for (int trial=0;trial<ntrials;++trial) {
-                    BBSTInterface<Integer> tree = factory.newTree(ex.param);
+                    SetInterface<Integer> tree = factory.newTree(ex.param);
                     SizeKeysumPair p = new SizeKeysumPair(0, 0);
                     if (prefill) p = fillToSteadyState(experimentRng, tree, ex.ratio, ex.maxkey, false);
                     if (!runTrial(out, false, trial+1 == ntrials, factory.getName() + ex.param + "," + trial, p, experimentRng, (AbstractAdapter) tree, ex)) System.exit(-1); // TODO: FIX THE HACKY CAST...
@@ -1078,7 +1096,7 @@ public class Main {
 
     void progress(
             DualPrintStream stdout,
-            final BBSTInterface<Integer> tree,
+            final SetInterface<Integer> tree,
             int z,
             int i,
             String name,

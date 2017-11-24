@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,99 +19,21 @@
 
 package adapters;
 
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
-import algorithms.published.ConcurrentChromaticTreeMap;
+import algorithms.published.LockFreeChromaticMap;
 
-///**
-// *
-// * @author trev
-// */
-//@Exclude
-//public class BBST3LLXCountViolAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
-//    public BBST3LLXCountViol<K,K> tree;
-//
-//    public BBST3LLXCountViolAdapter() {
-//        tree = new BBST3LLXCountViol();
-//    }
-//
-//    public BBST3LLXCountViolAdapter(final int allowedViolations) {
-//        tree = new BBST3LLXCountViol(allowedViolations);
-//    }
-//
-//    public boolean contains(K key) {
-//        return tree.containsKey(key);
-//    }
-//    
-//    public boolean add(K key, Random rng) {
-////        return tree.putIfAbsent(key, key) == null;
-//        tree.put(key, key); return true;
-//    }
-//
-//    public K get(K key) {
-//        return tree.get(key);
-//    }
-//
-//    public boolean remove(K key, Random rng) {
-//        return tree.remove(key) != null;
-//    }
-//
-//    public void addListener(OperationListener l) {
-//        tree.addListener(l);
-//    }
-//
-//    public int size() {
-//        return sequentialSize();
-//    }
-//
-//    public KSTNode<K> getRoot() {
-//        return tree.getRoot();
-//    }
-//    
-//    public double getAverageDepth() {
-//        return tree.getSumOfDepths() / (double) tree.getNumberOfNodes();
-//    }
-//
-//    public int getSumOfDepths() {
-//        return tree.getSumOfDepths();
-//    }
-//
-//    public int sequentialSize() {
-//        return tree.size();
-//    }
-//
-//    public double getRebalanceProbability() {
-//        return -1;
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return tree.toString();
-//    }
-//    
-//    public void disableRotations() {
-////        tree.debugNoRotations = true;
-//    }
-//
-//    public void enableRotations() {
-//      tree.debugNoRotations = false;
-//    }
-//
-//}
-
-
-
-public class LockFreeChromaticAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
-    public ConcurrentChromaticTreeMap<K,K> tree;
+public class LockFreeChromaticAdapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
+    public LockFreeChromaticMap<K,K> tree;
 
     public LockFreeChromaticAdapter() {
-        tree = new ConcurrentChromaticTreeMap();
+        tree = new LockFreeChromaticMap();
     }
 
     public LockFreeChromaticAdapter(final int allowedViolations) {
-        tree = new ConcurrentChromaticTreeMap(allowedViolations);
+        tree = new LockFreeChromaticMap(allowedViolations);
     }
 
     public boolean contains(K key) {
@@ -119,8 +41,8 @@ public class LockFreeChromaticAdapter<K extends Comparable<? super K>> extends A
     }
     
     public boolean add(K key, Random rng) {
-        return tree.putIfAbsent(key, key) == null;
-        //tree.put(key, key); return true;
+        //return tree.putIfAbsent(key, key) == null;
+        return tree.put(key, key) == null;
     }
 
     public K get(K key) {

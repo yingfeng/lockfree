@@ -4,7 +4,7 @@ package algorithms.published;
  * Implementation of dictionary ADT with a non-blocking AVL search tree.
  * Copyright (C) 2013 Ken Hoover
  * Contact (khoover@cs.toronto.edu) with questions or comments.
- * Optimized by Trevor Brown (tabrown [at] cs [dot] toronto [dot] edu).
+ * Optimized by Trevor Brown (me [at] tbrown [dot] pro).
  *
  * Based on Trevor Brown's implementation of the dictionary ADT with a
  * chromatic search tree, located at
@@ -57,25 +57,25 @@ package algorithms.published;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-public class ConcurrentRelaxedAVLMap<K, V> {
+public class LockFreeRelaxedAVLMap<K, V> {
     private final int d; // number of violations to allow on a search path before we fix everything on it
     private static final int DEFAULT_d = 15; // experimentally determined to yield good performance for both random workloads, and operations on sorted sequences
     private final Node root;
     private final Operation dummy;
     private final Comparator<? super K> comparator;
-    private final AtomicReferenceFieldUpdater<ConcurrentRelaxedAVLMap.Node, ConcurrentRelaxedAVLMap.Node> updateLeft, updateRight;
-    private final AtomicReferenceFieldUpdater<ConcurrentRelaxedAVLMap.Node, ConcurrentRelaxedAVLMap.Operation> updateOp;
+    private final AtomicReferenceFieldUpdater<LockFreeRelaxedAVLMap.Node, LockFreeRelaxedAVLMap.Node> updateLeft, updateRight;
+    private final AtomicReferenceFieldUpdater<LockFreeRelaxedAVLMap.Node, LockFreeRelaxedAVLMap.Operation> updateOp;
 
-    public ConcurrentRelaxedAVLMap() {
+    public LockFreeRelaxedAVLMap() {
         this(DEFAULT_d, null); 
     }
-    public ConcurrentRelaxedAVLMap(final Comparator<? super K> cmp) {
+    public LockFreeRelaxedAVLMap(final Comparator<? super K> cmp) {
         this(DEFAULT_d, cmp);
     }
-    public ConcurrentRelaxedAVLMap(final int allowedViolationsPerPath) {
+    public LockFreeRelaxedAVLMap(final int allowedViolationsPerPath) {
         this(allowedViolationsPerPath, null);
     }
-    public ConcurrentRelaxedAVLMap(final int allowedViolationsPerPath, final Comparator<? super K> cmp) {
+    public LockFreeRelaxedAVLMap(final int allowedViolationsPerPath, final Comparator<? super K> cmp) {
         d = allowedViolationsPerPath;
         comparator = cmp;
         updateLeft = AtomicReferenceFieldUpdater.newUpdater(Node.class, Node.class, "left");

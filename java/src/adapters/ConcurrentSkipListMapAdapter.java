@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 package adapters;
 
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.Globals;
 import main.support.KSTNode;
 import main.support.OperationListener;
@@ -34,7 +34,7 @@ import org.deuce.transform.Exclude;
  * @author trev
  */
 @Exclude
-public class SkipListAdapter<K> extends AbstractAdapter<K> implements BBSTInterface<K> {
+public class ConcurrentSkipListMapAdapter<K> extends AbstractAdapter<K> implements SetInterface<K> {
     final ConcurrentSkipListMap<K,K> tree = new ConcurrentSkipListMap<K,K>();
 
     public final boolean contains(final K key) {
@@ -42,8 +42,8 @@ public class SkipListAdapter<K> extends AbstractAdapter<K> implements BBSTInterf
     }
     
     public final boolean add(final K key, final Random rng) {
-        return tree.putIfAbsent(key, key) == null;
-        //tree.put(key, key); return true;
+//        return tree.putIfAbsent(key, key) == null;
+        return tree.put(key, key) == null;
     }
 
     public final K get(final K key) {

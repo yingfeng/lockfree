@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ package adapters;
 
 import java.util.Collections;
 import java.util.Map;
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -32,21 +32,22 @@ import java.util.TreeMap;
  *
  * @author trev
  */
-public class SyncTreeMapAdapter<K> extends AbstractAdapter<K> implements BBSTInterface<K>, SequentialPrefillStructure {
-    Map<K,K> tree = Collections.synchronizedMap(new TreeMap<K,K>());
+public class SyncTreeMapAdapter<K> extends AbstractAdapter<K> implements SetInterface<K>, SequentialPrefillStructure {
+    final Map<K,K> tree = Collections.synchronizedMap(new TreeMap<K,K>());
 
     public boolean contains(final K key) {
         return tree.containsKey(key);
     }
 
     public boolean add(final K key, final Random rng) {
-        // WARNING: THIS DOES NOT NATIVELY HAVE PUTIFABSENT!!!!!!!
-        synchronized (tree) {
-            return (tree.containsKey(key) ? false : tree.put(key, key) == null);
-            // note: we need the sync block to make the containsKey() AND put() atomic (together)
-            // this lets us implement atomic putIfAbsent
-        }
-        //tree.put(key, key); return true;
+        return tree.put(key, key) == null;
+//        // WARNING: THIS DOES NOT NATIVELY HAVE PUTIFABSENT
+//        // simulate putIfAbsent
+//        synchronized (tree) {
+//            return (tree.containsKey(key) ? false : tree.put(key, key) == null);
+//            // note: we need the sync block to make the containsKey() AND put() atomic (together)
+//            // this lets us implement atomic putIfAbsent
+//        }
     }
 
     public K get(K key) {

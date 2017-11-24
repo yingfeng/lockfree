@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,4 +63,7 @@ public abstract class AbstractAdapter<K> {
         return 0;
     }
 
+    public void debugPrint(){ 
+        System.out.println("NOTICE: debugPrint() is not implemented for " + getClass().getName());
+    }
 }

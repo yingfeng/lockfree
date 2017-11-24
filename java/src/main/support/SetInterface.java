@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ package main.support;
 import org.deuce.transform.Exclude;
 
 @Exclude
-public interface BBSTInterface<K> {
+public interface SetInterface<K> {
     public boolean contains(final K key);
     public boolean add(final K key, final Random rng);//, final int[] metrics);
     public K get(final K key);

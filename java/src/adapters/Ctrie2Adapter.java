@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 package adapters;
 
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -32,7 +32,7 @@ import scala.collection.immutable.ListMap;
  *
  * @author trev
  */
-public class Ctrie2Adapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements BBSTInterface<K> {
+public class Ctrie2Adapter<K extends Comparable<? super K>> extends AbstractAdapter<K> implements SetInterface<K> {
     public final ConcurrentTrie<K,K> tree;
     KSTNode<K> root;
     
@@ -50,7 +50,8 @@ public class Ctrie2Adapter<K extends Comparable<? super K>> extends AbstractAdap
 
     @Override
     public final boolean add(final K key, final Random rng, final int[] metrics) {
-        return tree.putIfAbsent(key, key).isEmpty();
+//        return tree.putIfAbsent(key, key).isEmpty();
+        return tree.put(key, key).isEmpty();
     }
 
     public final K get(final K key) {

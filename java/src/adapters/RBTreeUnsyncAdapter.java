@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ package adapters;
 
 import algorithms.deucestm.RBTreeUnsync;
 import java.util.Iterator;
-import main.support.BBSTInterface;
+import main.support.SetInterface;
 import main.support.KSTNode;
 import main.support.OperationListener;
 import main.support.Random;
@@ -36,7 +36,7 @@ import org.deuce.transform.Exclude;
 @Exclude
 public class RBTreeUnsyncAdapter<K extends Comparable<? super K>>
 extends AbstractAdapter<K>
-implements BBSTInterface<K>, SequentialStructure {
+implements SetInterface<K>, SequentialStructure {
     RBTreeUnsync<K,K> tree;
 
     public RBTreeUnsyncAdapter(double rebalance_probability) {
@@ -48,8 +48,8 @@ implements BBSTInterface<K>, SequentialStructure {
     }
     
     public boolean add(K key, Random rng) {
-        return tree.putIfAbsent(key, key);
-        //tree.put(key, key); return true;
+//        return tree.putIfAbsent(key, key);
+        return tree.put(key, key) == null;
     }
 
     public K get(K key) {

@@ -1,7 +1,7 @@
 /**
  * Java test harness for throughput experiments on concurrent data structures.
  * Copyright (C) 2012 Trevor Brown
- * Contact (tabrown [at] cs [dot] toronto [dot edu]) with any questions or comments.
+ * Contact (me [at] tbrown [dot] pro) with any questions or comments.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import org.deuce.transform.Exclude;
  */
 @Exclude
 public class Globals {
-    public static final int DEFAULT_SEED = 581968107;//11720571;
+    public static final int DEFAULT_SEED = (int) System.currentTimeMillis(); //581968107;//11720571;
     public static final int DEFAULT_KEYRANGE = 1000000;
 
     public static final int DEFAULT_CHAIN_SIZE = 1000;
