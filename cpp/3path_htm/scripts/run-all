@@ -1,0 +1,144 @@
+#!/bin/bash
+
+if [ "$#" -ge "1" ]; then
+    echo "RUNNING IN TEST MODE"
+    args="-t 10 -rq 0"
+    trials="0"
+    testing=1
+else
+    args="-t 1000 -rq 0 -p"
+    trials="0 1 2 3 4"
+    testing=0
+fi
+
+cd ..
+
+machine=`hostname`
+
+mrs="debra"
+mps="perthread_and_shared none"
+mas="new"
+mallocs="malloc tcmalloc jemalloc"
+
+if [ "$machine" == "theoryhtm" ]; then
+    threads="1 2 3 4 5 6 7 8"
+    pinning="0-7"
+elif [ "$machine" == "tapuz40" ]; then
+    threads="1 6 12 18 24 24 30 36 42 48"
+    pinning="0-11,24-35,12-23,36-47"
+else
+    echo "ERROR: machine ${machine} not recognized; if using a new machine, remember to add a machine definition to run-all"
+    exit 1
+fi
+
+## get formatted date
+d=`date` ; d=`echo $d | cut -d" " -f6 ; echo $d | cut -d" " -f2 ; echo $d | cut -d" " -f3 ; echo $d | cut -d" " -f4 | tr ":" "-"` ; d=`echo $d | tr " " "-"`
+outdir="output"
+oldoutdir="output.$d"
+
+mv $outdir $oldoutdir
+mkdir $outdir
+
+bad=0
+cnt1=0
+cnt2=0
+
+for mode in 0 1 ; do
+    while read htmfast htmslow method ; do
+        #echo "htmfast=$htmfast htmslow=$htmslow method=$method"
+        method=`echo $method | tr -d "\n"` ## watch out for stray \r characters that screw up tokenizing / printing / implicit casting
+        while read ds i d k rqsize ; do
+            #echo "ds=$ds i=$i d=$d k=$k rqsize=$rqsize"
+            rqsize=`echo $rqsize | tr -d "\r"` ## watch out for stray \r characters that screw up tokenizing / printing / implicit casting
+            for mr in $mrs ; do
+                for mp in $mps ; do
+                    for ma in $mas ; do
+                        for malloc in $mallocs ; do
+                            #echo "mr=$mr mp=$mp ma=$ma malloc=$malloc"
+                            for thr in $threads ; do
+                                #echo "thr=$thr"
+                                #echo "rqsize=$rqsize"
+                                #echo $rqsize | od -c
+                                if [ "$rqsize" -eq "0" ]; then
+                                    workthr=$thr
+                                    rqthr=0
+                                else
+                                    workthr=`expr $thr - 1`
+                                    rqthr=1
+                                fi
+                        
+                                if [ "$malloc" == "default" ]; then
+                                    envcmd=""
+                                elif [ "$malloc" == "jemalloc" ]; then
+                                    envcmd="env LD_PRELOAD=./lib/libjemalloc-5.0.1-25.so"
+                                elif [ "$malloc" == "tcmalloc" ]; then
+                                    envcmd="env LD_PRELOAD=./lib/libtcmalloc-4.1.2.so"
+                                fi
+                        
+                                for trial in $trials ; do
+                                    ### ONLY BST SUPPORTS HYBRID NOREC, SO SKIP OTHER DATA STRUCTURES
+                                    if [ "$method" == "hytm" ]; then
+                                        if [ "$ds" != "bst" ]; then
+                                            continue
+                                        fi
+                                    fi
+                        
+                                    if [ "$mode" == "0" ]; then
+                                        cnt1=`expr $cnt1 + 1`
+                                    #    echo "Counting: step $cnt1"
+                                        if (( (cnt1 % 100) == 0 )); then
+                                            echo "Counting: step $cnt1"
+                                        fi
+                                        continue
+                                    fi
+                                    cnt2=`expr $cnt2 + 1`
+                                    
+                                    ## edit the postargs(_...) and filename(_...) lines to change parameters
+                                    postargs="-ma $ma -mp $mp -mr $mr -k $k -i $i -d $d -rqsize $rqsize -nwork $workthr -nrq $rqthr -htmfast $htmfast -htmslow $htmslow -bind $pinning"
+                                    postargs_literal='-ma $ma -mp $mp -mr $mr -k $k -i $i -d $d -rqsize $rqsize -nwork $workthr -nrq $rqthr -htmfast $htmfast -htmslow $htmslow -bind $pinning'
+                        
+                                    filename="step${cnt2}_trial_${trial}_ds_${ds}-${method}-${malloc}"
+                                    filename_literal='step${cnt2}_trial_${trial}_ds_${ds}-${method}-${malloc}'
+                        
+                                    ## the following lines need not be edited
+                                    filename=${outdir}/${filename}_`echo $args $postargs | tr "_" "-" | tr "," "." | tr " " "_"`.out
+                                    cmd="./${machine}.${ds}-${method}.out $args $postargs"
+                        
+                                    echo "step $cnt2 / $cnt1: $envcmd $cmd"
+                                    echo $envcmd $cmd > $filename
+                                    $envcmd $cmd >> $filename 2>&1
+                        
+                                    ## do sanity check
+                                    throughput=`cat $filename | grep "incl."`
+                                    echo -n "$throughput ; "
+                                    date
+                                    throughput=`echo $throughput | cut -d":" -f2 | tr -d " "`
+                                    if [ "$throughput" == "" ]; then
+                                        if [ "$testing" -eq "1" ]; then
+                                            echo "Some trial(s) had no throughput line!"
+                                            exit 1
+                                        fi
+                                        bad=1
+                                        echo $filename >> ${outdir}/errors.out
+                                    fi
+                                done
+                            done
+                        done
+                    done
+                done
+            done
+        done < scripts/explist
+    done < scripts/algolist
+done
+
+if [ "$bad" -eq "1" ]; then
+    echo "Some trial(s) had no throughput line:"
+    cat errors.out
+fi
+
+## the following lines need not be edited
+args_literal=`echo $args | tr " " ","`
+postargs_literal=`echo $postargs_literal | tr " " ","`
+filename_literal=`echo $filename_literal | tr "_" ","`
+header=$filename_literal,$args_literal,$postargs_literal
+echo "$header" > ${outdir}/header

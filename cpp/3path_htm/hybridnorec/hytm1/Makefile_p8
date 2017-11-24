@@ -1,0 +1,74 @@
+# ==============================================================================
+#
+# Makefile.real
+#
+# ==============================================================================
+
+LIBNAME=hytm1
+
+# ==============================================================================
+# Variables
+# ==============================================================================
+
+EXTRAFLAGS := $(EXTRAFLAGS1) $(EXTRAFLAGS2) $(EXTRAFLAGS3) $(EXTRAFLAGS4)
+#CC       := /opt/at9.0/bin/powerpc64le-linux-gnu-g++
+#CFLAGS   := -O3 -g3 -Wall -fmessage-length=0 -mcpu=power8 -mtune=power8 -mcmodel=medium $(EXTRAFLAGS)
+CC       := g++
+CFLAGS   := -O3 -g3 -Wall -fmessage-length=0 $(EXTRAFLAGS)
+CFLAGS   += -DRECORD_ABORTS
+CFLAGS   += -std=c++11
+CPP      := $(CC)
+CPPFLAGS := $(CFLAGS)
+LD       := $(CC)
+LDFLAGS  += $(EXTRAFLAGS)
+
+LIBHYTM  := lib$(LIBNAME).a
+
+AR       := ar
+RANLIB   := ranlib
+
+RM := rm -f
+
+# ADD GPROF INSTRUMENTATION
+#CPPFLAGS += -pg
+#CFLAGS += -pg
+#LDFLAGS += -pg -Winline
+
+# ==============================================================================
+# Rules
+# ==============================================================================
+
+.PHONY: default
+default: lazy
+
+.PHONY: clean
+clean:
+	$(RM) $(LIBHYTM) $(LIBNAME).o tmalloc.o
+
+$(LIBHYTM).o: $(LIBHYTM).cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+tmalloc.o: tmalloc.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(LIBHYTM): $(LIBNAME).o tmalloc.o
+	$(AR) cru $@ $^
+	$(RANLIB) $@
+
+.PHONY: lazy
+lazy: $(LIBHYTM)
+
+
+
+# ==============================================================================
+# Dependencies
+# ==============================================================================
+
+%.o: %.h
+
+
+# ==============================================================================
+#
+# End of Makefile.real
+#
+# ==============================================================================

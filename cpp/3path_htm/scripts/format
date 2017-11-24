@@ -1,0 +1,34 @@
+#!/bin/bash
+
+## fields to grep from file
+## (grep $fields[i] must yield one line of the form "abc : ###" or "abc : ### (xyz)")
+fields=("total insert succ" "total erase succ" "throughput" "incl. queries" "elapsed milliseconds" "total path fast" "total path slow" "total path fallback" "total fast htm commit" "fast htm success" "fast htm fail" "total fast htm abort" "total slow htm commit" "slow htm success" "slow htm fail" "total slow htm abort" "fallback success" "fallback fail")
+
+## print csv header
+preheader=`cat ../output/header | tr "-" "." | tr -d "\r\n" | sed 's/\\.${method}/,${method}/g; s/\\.${malloc}/,${malloc}/g'`
+echo -n "$preheader"
+for f in "${fields[@]}" ; do
+	echo -n ,$f
+done
+echo -n ",filename,cmd"
+echo
+
+## print csv contents
+cnt2=0
+cnt1=`ls ../output/*.out | wc -l`
+for x in `ls ../output/*.out` ; do
+    cnt2=`expr $cnt2 + 1`
+	## prepend information in filename
+    fnamedata=`echo $x | sed 's/perthread_and_shared/pool/g'`
+	fnamedata=`echo $fnamedata | tr "_" "," | tr "-" "." | cut -d"/" -f3 | sed 's/\\.out//g; s/\\.jemalloc/,jemalloc/g; s/\\.tcmalloc/,tcmalloc/g; s/\\.malloc/,malloc/g; s/\\.3path/,3path/g; s/\\.tle/,tle/g; s/\\.hytm/,hytm/g'`
+	echo -n "$fnamedata"
+	## grep fields from file
+	for f in "${fields[@]}" ; do
+		echo -n , ; cat $x | grep "$f" | cut -d":" -f2 | cut -d"(" -f1 | tr -d " _abcdefghijklmnopqrstuvwxyz\r\n"
+	done
+	## add filename and command
+	echo -n ",\"$x\",\""
+	echo -n `cat $x | head -1`
+	echo "\""
+    >&2 echo step ${cnt2} / ${cnt1}: $x
+done
