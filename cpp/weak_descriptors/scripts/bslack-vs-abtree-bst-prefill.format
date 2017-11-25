@@ -1,0 +1,17 @@
+#!/bin/sh
+
+outdir=../output.csl-pomela1.bslack-vs-abtree-bst
+fname=bslack-vs-abtree-bst-prefill.csv
+cd $outdir
+echo alg,nthreads,ins,del,rq,maxkey,prefilltime
+echo alg,nthreads,ins,del,rq,maxkey,prefilltime > $fname
+
+cnt1=0
+cnt2=0
+for mode in 0 1 ; do
+for x in *.data ; do
+	if [ "$mode" -eq "0" ]; then cnt1=`expr $cnt1 + 1` ; continue ; else cnt2=`expr $cnt2 + 1` ; fi
+	echo step $cnt2/$cnt1: `echo $x | cut -d"." -f3`,`cat $x | grep "WORK_THREADS" | cut -d"=" -f2`,`cat $x | grep "INS=" | cut -d"=" -f2`,`cat $x | grep "DEL" | cut -d"=" -f2`,`echo $x | cut -d"." -f23`,`cat $x | grep "MAXKEY" | cut -d"=" -f2`,`cat $x | grep "finished" | cut -d" " -f18`
+	echo `echo $x | cut -d"." -f3`,`cat $x | grep "WORK_THREADS" | cut -d"=" -f2`,`cat $x | grep "INS=" | cut -d"=" -f2`,`cat $x | grep "DEL" | cut -d"=" -f2`,`echo $x | cut -d"." -f23`,`cat $x | grep "MAXKEY" | cut -d"=" -f2`,`cat $x | grep "finished" | cut -d" " -f18` >> $fname
+done
+done

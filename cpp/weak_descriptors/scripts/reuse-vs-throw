@@ -1,0 +1,107 @@
+#!/bin/bash
+
+source plaf.bash
+
+seqwidth=48
+algs_reclaimers_pools="bst_reuse~debra~perthread_and_shared bst_reuse~debra~none bst_throwaway~debra~perthread_and_shared bst_throwaway~debra~none bst_reuse_rcu~rcu~none bst_throwaway_rcu~rcu~none"
+keyranges="100000 1000000"
+insdel_pcnts="0 5 50"
+lgchunk_sizes="19 21"
+ntrials=10
+t=1000
+p=-p
+ma=new
+
+if [ "$#" -ne "0" ]; then
+	echo "RUNNING IN TEST MODE"
+	ntrials=1
+	t=1
+	p=
+fi
+
+outdir=output.${machine}.reuse-vs-throw
+logfile=$outdir/log.out
+compilinglogfile=$outdir/compiling.out
+stderrfile=$outdir/stderr.out
+f=$outdir/temp.out
+
+cd ..
+rm -r -f $outdir.old
+mv $outdir $outdir.old
+mkdir $outdir
+
+if [ -e "./lib/libjemalloc.so" ]; then
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so"
+else
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so.2"
+fi
+
+echo "-------------------- BEGIN VARIABLES --------------------" >> $logfile
+( set -o posix ; set ) >> $logfile
+echo "--------------------- END VARIABLES ---------------------" >> $logfile
+
+echo "Compiling data structures and test harness..." >> $logfile
+cat $logfile
+
+make -j >> $compilinglogfile
+if [ "$?" -ne 0 ]; then
+    cat $compilinglogfile
+    echo "ERROR COMPILING"
+    exit 1
+fi
+
+cnt1=0
+cnt2=0
+for counting in 1 0; do
+for lgchunk in $lgchunk_sizes; do
+    malloc_conf="MALLOC_CONF=lg_chunk:${lgchunk}"
+    for alg_reclaimer_pool in $algs_reclaimers_pools; do
+        alg=`echo $alg_reclaimer_pool | cut -d"~" -f1`
+        mr=`echo $alg_reclaimer_pool | cut -d"~" -f2`
+        mp=`echo $alg_reclaimer_pool | cut -d"~" -f3`
+        for k in $keyranges; do
+            if [ $counting -eq 1 ]; then
+                echo "counting trials for lgchunk $lgchunk, alg $alg, mr $mr, mp $mp and k $k"
+            fi
+
+            for insdel_pcnt in $insdel_pcnts; do
+            for nthreads in $threadcounts; do
+            for ((trial=0;trial<$ntrials;++trial)); do
+                if [ $counting -eq 1 ]; then
+                    cnt1=`expr $cnt1 + 1`
+                    continue
+                fi
+
+                cnt2=`expr $cnt2 + 1`
+                echo -n "trial $cnt2 / $cnt1: "
+
+                args="-nrq 0 -t $t -mr $mr -ma $ma -mp $mp $p -k $k -i $insdel_pcnt -d $insdel_pcnt -rq 0 -nwork $nthreads"
+                cmd="$machine.$alg.out $args"
+                fname=`echo $cmd | tr " " "."`
+                fname="step$cnt2.${fname}.-seqwidth.$seqwidth.-trial.$trial.-lgchunk.$lgchunk"
+                fname="$outdir/$fname.data"
+                echo "$envcmd ${malloc_conf} $cmdprefix ./$cmd"
+                echo "$envcmd ${malloc_conf} $cmdprefix ./$cmd" > $fname
+                $envcmd ${malloc_conf} $cmdprefix ./$machine.$alg.out $args >> $fname 2>>$stderrfile
+                if [ "$?" -ne "0" ]; then
+                    echo "ERROR: nonzero status after executing cmd"
+                    cat $stderrfile
+                    exit
+                fi
+            done
+            done
+            done
+        done
+    done
+done
+done
+
+cat $logfile > $f
+cat $compilinglogfile > $logfile
+echo >> $logfile
+cat $f >> $logfile
+rm -f $f
+rm -f $compilinglogfile
+
+cd scripts
+./reuse-vs-throw.format ${machine}

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+exp=kcas-delay
+source format-script-begin.bash
+
+## fields to grep from file
+## (grep $fields[i] must yield one line of the form "abc : ### [...]")
+fields=("completed ops" "kcas helping" "rdcss helping" "footprint before" "footprint after" "footprint peak non-adjusted" "footprint peak adjusted")
+
+## (grep $fields2[i] must yield one line of the form "abc=###")
+fields2=("MILLIS_TO_RUN" "MAXKEY" "TOTAL_THREADS" "WIDTH_SEQ" "THREAD_BINDING" "KCAS_MAXK" "KCAS_MAXTHREADS" "PAPI_L1_DCM" "PAPI_L2_TCM" "PAPI_L3_TCM" "PAPI_TOT_CYC" "PAPI_RES_STL" "PAPI_TOT_ISR")
+
+## (grep $fields3[i] must yield one or more lines of the form "abc : [^\w]+[ [^\w]+]*")
+## a specific space-delimited subfield will be extracted from each line and summed
+fields3=()
+
+source scripts/format-script-end.bash

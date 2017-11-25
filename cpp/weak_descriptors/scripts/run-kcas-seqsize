@@ -1,0 +1,100 @@
+#!/bin/bash
+
+source plaf.bash
+
+minseqwidth=2
+maxseqwidth=20
+maxkeycounts="16384 1048576 67108864"
+algs="kcas_reuse2~kcas2-reuse kcas_reuse16~kcas16-reuse"
+ntrials=200
+t=100
+
+pinning=-DTHREAD_BINDING=${pin_cluster}
+
+fields_to_stdout=-f1-6
+outdir=output.${machine}.kcas_seqsize
+logfile=${outdir}/log.out
+compilinglogfile=${outdir}/compiling.out
+stderrfile=${outdir}/stderr.out
+f=${outdir}/temp.out
+
+cd ..
+rm -r -f ${outdir}.old
+mv $outdir ${outdir}.old
+mkdir $outdir
+
+if [ -e "./lib/libjemalloc.so" ]; then
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so"
+else
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so.2"
+fi
+
+echo "-------------------- BEGIN VARIABLES --------------------" >> $logfile
+( set -o posix ; set ) >> $logfile
+echo "--------------------- END VARIABLES ---------------------" >> $logfile
+
+echo >> $logfile
+
+echo maxkey,seqwidth,trial,throughput,error,nusers,errormsg,cmd >> $logfile
+cat $logfile
+
+cnt1=0
+cnt2=0
+for counting in 1 0; do
+for alg_target in $algs; do
+    alg=`echo ${alg_target} | cut -d"~" -f1`
+    target=`echo ${alg_target} | cut -d"~" -f2`
+
+    for ((seqwidth=$minseqwidth;seqwidth<=$maxseqwidth;seqwidth++)); do
+        if [ $counting -eq 0 ]; then
+            echo -n "Compiling for seqwidth $seqwidth... "
+            make $target machine=${machine} xargs=-DWIDTH1_SEQ=$seqwidth pinning=$pinning >> $compilinglogfile
+            if [ "$?" -ne 0 ]; then
+                cat $compilinglogfile
+                echo "ERROR COMPILING"
+                exit 1
+            fi
+            echo "done." #Compiled with -DWIDTH1_SEQ=$seqwidth"
+        else
+            echo "counting trials for alg $alg and target $target seqwidth $seqwidth"
+        fi
+
+        for k in $maxkeycounts; do
+        for nthreads in $maxthreadcount; do
+        for ((trial=0;trial<$ntrials;++trial)); do
+            if [ $counting -eq 1 ]; then
+                cnt1=`expr $cnt1 + 1`
+                continue
+            fi
+
+            cnt2=`expr $cnt2 + 1`
+            echo -n "trial $cnt2 / $cnt1: "
+
+            cmd="./${machine}.$alg.out -t $t -k $k -n $nthreads"
+            echo $envcmd $cmdprefix $cmd > $f
+            $envcmd $cmdprefix $cmd >> $f 2>>$stderrfile
+            echo -n $k >> $logfile
+            echo -n ,$seqwidth >> $logfile
+            echo -n ,$trial >> $logfile
+            echo -n ,`cat $f | grep "throughput" | cut -d":" -f2 | tr -d " "` >> $logfile
+            cat $f | grep -E "OK" > /dev/null
+            echo -n ,$? >> $logfile
+            echo -n ,`who | wc -l` >> $logfile
+            echo -n ,`cat $f | grep -E "OK|FAILURE"`>> $logfile
+            echo -n ,$envcmd $cmdprefix $cmd >> $logfile
+            echo >> $logfile
+            cat $logfile | tail -1 | cut -d"," $fields_to_stdout
+        done
+        done
+        done
+    done
+done
+done
+
+cat $logfile > $f
+cat $compilinglogfile > $logfile
+echo >> $logfile
+cat $f >> $logfile
+rm -f $f
+rm -f $compilinglogfile
+

@@ -1,0 +1,105 @@
+#!/bin/bash
+
+source plaf.bash
+
+seqwidth=48
+algs="kcas_reuse kcas_throwaway_rcu_nopool kcas_throwaway_hazardptr_nopool kcas_throwaway_debra_nopool"
+keyranges_ks="256~2 16384~2 16384~16 1048576~2 1048576~16 67108864~2 67108864~16"
+lgchunk_sizes="19 21"
+ntrials=10
+t=1000
+
+if [ "$#" -ne "0" ]; then
+	echo "RUNNING IN TEST MODE"
+	ntrials=1
+	t=1
+fi
+
+outdir=output.${machine}.kcas-reuse-vs-throw
+logfile=$outdir/log.out
+compilinglogfile=$outdir/compiling.out
+stderrfile=$outdir/stderr.out
+f=$outdir/temp.out
+
+cd ..
+rm -r -f $outdir.old
+mv $outdir $outdir.old
+mkdir $outdir
+
+if [ -e "./lib/libjemalloc.so" ]; then
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so"
+else
+    envcmd="env LD_PRELOAD=./lib/libjemalloc.so.2"
+fi
+
+echo "-------------------- BEGIN VARIABLES --------------------" >> $logfile
+( set -o posix ; set ) >> $logfile
+echo "--------------------- END VARIABLES ---------------------" >> $logfile
+
+echo "Compiling kcas-ubench..." >> $logfile
+cat $logfile
+
+make -j >> $compilinglogfile
+if [ "$?" -ne "0" ]; then
+	echo "ERROR: compilation failed"
+	cat $compilinglogfile
+	exit 1
+fi
+
+succ=1
+cnt1=0
+cnt2=0
+for counting in 1 0; do
+for lgchunk in $lgchunk_sizes; do
+    malloc_conf="MALLOC_CONF=lg_chunk:${lgchunk}"
+    for alg in $algs; do
+    for keyrange_k in $keyranges_ks; do
+        keyrange=`echo $keyrange_k | cut -d"~" -f1`
+        maxk=`echo $keyrange_k | cut -d"~" -f2`
+
+        if [ $counting -eq 1 ]; then
+            echo "counting trials for lgchunk $lgchunk, alg $alg, keyrange $keyrange, maxk $maxk"
+        fi
+
+        for nthreads in $threadcounts; do
+        for ((trial=0;trial<$ntrials;++trial)); do
+            if [ $counting -eq 1 ]; then
+                cnt1=`expr $cnt1 + 1`
+                continue
+            fi
+
+            cnt2=`expr $cnt2 + 1`
+            echo -n "trial $cnt2 / $cnt1: "
+
+            args="-t $t -k $keyrange -n $nthreads"
+            cmd="$machine.${alg}_k${maxk}.out $args"
+            fname=`echo $cmd | tr " " "."`
+            fname="step$cnt2.${fname}.-seqwidth.$seqwidth.-trial.$trial.-lgchunk.$lgchunk"
+            fname="$outdir/$fname.data"
+            echo "$envcmd ${malloc_conf} $cmdprefix ./$cmd"
+            echo "$envcmd ${malloc_conf} $cmdprefix ./$cmd" > $fname
+            $envcmd ${malloc_conf} $cmdprefix ./$machine.${alg}_k${maxk}.out $args >> $fname 2>>$stderrfile
+            if [ "$?" -ne "0" ]; then
+                echo "ERROR: nonzero status after executing $cmd" >> $stderrfile
+                succ=0
+            fi
+        done
+        done
+    done
+    done
+done
+done
+
+cat $logfile > $f
+cat $compilinglogfile > $logfile
+echo >> $logfile
+cat $f >> $logfile
+rm -f $f
+rm -f $compilinglogfile
+
+if [ $succ -eq 0 ]; then
+    cat $stderrfile
+else
+    cd scripts
+    ./kcas-reuse-vs-throw.format ${machine}
+fi
