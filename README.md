@@ -1,51 +1,39 @@
-# Concurrent data structures #
+# Software Artifacts #
 
-A repository of some of my data structure implementations in Java and C++, and test harnesses for running microbenchmarks.
-
-### Lock-free chromatic tree ###
-
-* Available for both Java and C++
-* C++ version has various memory reclamation options implemented, including hazard pointers, DEBRA and DEBRA+. 
-* Path to Java version: java/src/algorithms/published/ConcurrentChromaticTreeMap*
-* Path to C++ version: cpp/debra/chromatic*
-
-### Lock-free relaxed AVL tree ###
-
-* Available in Java
-* Path: java/src/algorithms/published/ConcurrentRelaxedAVLMap*
-
-### Lock-free BST of Ellen et al. ###
-
-* Available for both Java and C++
-* C++ version has various memory reclamation options implemented, including hazard pointers, DEBRA and DEBRA+. 
-* Path to Java version: java/src/algorithms/published/ConcurrentBSTMap*
-* Path to C++ version: cpp/debra/bst*
-
-### Lock-free k-ary search tree ###
-
-* Available in Java
-* Also implements range queries (subSet())
-* Path: java/src/algorithms/published/LockFreeKSTRQ*
-* Optimized version for k=4 with no range query operation: java/src/algorithms/published/LockFree4ST*
-
-### Java test harness ###
-
-* Comes with support for a large number of data structure implementations
-* Supports range queries for some data structures
-* See README in java/
-
-### C++ test harness ###
-
-* Can easily swap in several memory allocation and reclamation schemes
-* Comes with support for the lock-free BST and Chromatic trees
-* See README in cpp/debra/
-
-### The DEBRA(+) memory reclamation algorithm ###
-
-* See README in cpp/debra/
-
-### Repository contact ###
-
-Trevor Brown (me [at] tbrown [dot] pro)
-
+A repository of software artifacts for my papers.
 The papers that accompany these implementations are available at: http://tbrown.pro
+
+### Java lock-free data structure library ###
+
+* Introduced the first lock-free unbalanced binary search tree implementation.
+* Introduced the first implementation of LLX and SCX synchronization primitives.
+* Also introduced: k-ary search trees, relaxed AVL trees, Chromatic trees, b-slack trees.
+* Includes experimental test harness with support for 13 competing data structures.
+* Path to artifact: /java
+
+### C++ lock-free data structure library ###
+
+* Introduced the first C++ implementation of LLX and SCX synchronization primitives.
+* Provides unbalanced BSTs and relaxed (a,b)-trees using LLX and SCX.
+* Includes four different transactional memory based algorithms for each data structure.
+* Path to artifact: /cpp/3path_htm
+
+### Lock-free memory reclamation in C++ ###
+
+* Provides a record manager library with allocation, reclamation and object pooling plugins (including five allocators and four memory reclamation algorithms).
+* Memory reclamation algorithms include: hazard pointers, DEBRA, DEBRA+
+* Includes lock-free BSTs and Chromatic trees implemented using this library.
+* Path to artifact: /cpp/debra
+
+### Reusable descriptors for lock-free data structures in C++ ###
+
+* Provides a lock-free reusable descriptor library.
+* Includes four advanced lock-free data structures accelerated using this library.
+* Path to artifact: /cpp/weak_descriptors
+
+### Support for range query operations in C++ ###
+
+* Provides three novel algorithms for adding range query operations to data structures.
+* Includes seven different data structures augmented with range query support (up to five variants of each data structure).
+* Includes an in-memory database (DBx1000) benchmark.
+* Path to artifact: /cpp/range_queries
