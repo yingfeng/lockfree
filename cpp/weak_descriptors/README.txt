@@ -13,7 +13,7 @@ In this artifact, we provide the following data structures:
     a. Implementation with throwaway descriptors
        (./bslack_throwaway/ compiled with -DUSE_SIMPLIFIED_ABTREE_REBALANCING)
     b. Implementation with weak (reusable) descriptors
-       (./bslack_reuse/ compiles with -DUSE_SIMPLIFIED_ABTREE_REBALANCING)
+       (./bslack_reuse/ compiled with -DUSE_SIMPLIFIED_ABTREE_REBALANCING)
 3. Relaxed b-slack tree
     a. Implementation with throwaway descriptors
        (./bslack_throwaway/)
