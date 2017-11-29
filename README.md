@@ -1,6 +1,6 @@
 # Software Artifacts #
 
-A repository of software artifacts (in C++ and Java) for my papers.
+A repository of software artifacts for my papers.
 The papers that accompany these implementations are available at: http://tbrown.pro
 
 ### Java lock-free data structure library ###
