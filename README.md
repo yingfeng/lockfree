@@ -30,6 +30,7 @@ The papers that accompany these implementations are available at: http://tbrown.
 * Provides a lock-free reusable descriptor library.
 * Includes four advanced lock-free data structures accelerated using this library.
 * Path to artifact: /cpp/weak_descriptors
+* Coauthored with Maya Arbel-Raviv.
 
 ### Support for range query operations in C++ ###
 
@@ -37,3 +38,4 @@ The papers that accompany these implementations are available at: http://tbrown.
 * Includes seven different data structures augmented with range query support (up to five variants of each data structure).
 * Includes an in-memory database (DBx1000) benchmark.
 * Path to artifact: /cpp/range_queries
+* Coauthored with Maya Arbel-Raviv.
