@@ -52,11 +52,6 @@ struct node_t {
     bool marked;
 };
 
-struct predicate_info_t {
-        uint64_t min_key;
-        uint64_t max_key;
-};
-
 #define nodeptr node_t<K,V> *
 
 template <typename K, typename V, class RecManager>

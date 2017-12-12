@@ -1,6 +1,15 @@
 /* 
- * File:   rq_lockfree.h
- * Author: trbot
+ * This is a lock-free implementation of the range query technique introduced
+ * in the paper "Harnessing Epoch-based Reclamation for Efficient Range Queries"
+ * by Maya Arbel-Raviv and Trevor Brown (PPoPP 2018).
+ * 
+ * It uses a global time stamp that is accessed and modified using a lock-free
+ * double-compare single-swap (DCSS) primitive.
+ * Range queries use fetch-and-add to efficiently increment the time stamp.
+ * Update operations use DCSS to atomically read the time stamp at the same time
+ * as the update is performed.
+ * 
+ * Author: Trevor Brown and Maya Arbel-Raviv
  *
  * Created on May 9, 2017, 4:30 PM
  */

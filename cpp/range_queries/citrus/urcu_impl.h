@@ -63,7 +63,7 @@ void unregisterThread() {
     times = NULL;
 }
 
-void readLock(uint64_t val1, uint64_t val2) {
+void readLock() {
     assert(urcu_table[i] != NULL);
 #ifdef RCU_USE_TSC
     __sync_lock_test_and_set(&urcu_table[i]->time, read_tsc() << 1);
@@ -106,7 +106,7 @@ void synchronize() {
 
 #else
 
-void synchronize(predicate pred, predicate_info pred_info) {
+void synchronize() {
     int i;
     //read old counters
     for (i = 0; i < threads; i++) {

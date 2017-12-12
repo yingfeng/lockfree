@@ -27,4 +27,4 @@
 #	echo $csvline >> $outfile
 #done
 
-cat data/rq_tpcc/summary.txt | tail -1 | tr "," "\n" | tr -d " " | cut -d"=" -f1 | tr "\n" "," ; echo ; cat macrobench/data/rq_tpcc/summary.txt | grep "datastructure" | while read line ; do echo $line | tr "," "\n" | tr -d " " | cut -d"=" -f2 | tr "\n" "," ; echo ; done
+cat data/rq_tpcc/summary.txt | tail -1 | tr "," "\n" | tr -d " " | cut -d"=" -f1 | tr "\n" "," ; echo ; cat data/rq_tpcc/summary.txt | grep "datastructure" | while read line ; do echo $line | tr "," "\n" | tr -d " " | cut -d"=" -f2 | tr "\n" "," ; echo ; done

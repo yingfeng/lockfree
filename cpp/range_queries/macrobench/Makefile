@@ -1,4 +1,5 @@
-PLAF = -DLOGICAL_PROCESSORS=64 -DMAX_TID_POW2=64 -DCPU_FREQ=2.1
+include ../config.mk
+PLAF = -DLOGICAL_PROCESSORS=$(maxthreads_powerof2) -DMAX_TID_POW2=$(maxthreads_powerof2) -DCPU_FREQ_GHZ=$(cpu_freq_ghz) -DCPU_FREQ=$(cpu_freq_ghz)
 
 dict=CITRUS_SPIN
 workload=TPCC

@@ -27,16 +27,13 @@ typedef struct rcu_node_t {
     //char p2[128-sizeof(time)- 2*sizeof(uint64_t)];
 } rcu_node;
 
-typedef struct predicate_info_t * predicate_info;
-typedef bool (*predicate)(predicate_info, uint64_t, uint64_t);
-
 namespace urcu {
 
 void init(const int numThreads);
 void deinit(const int numThreads);
-void readLock(uint64_t val1, uint64_t val2);
+void readLock();
 void readUnlock();
-void synchronize(predicate pred, predicate_info pred_info); 
+void synchronize(); 
 void registerThread(int id);
 void unregisterThread();
 

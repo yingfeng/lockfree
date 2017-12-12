@@ -34,7 +34,6 @@ typedef long long test_type;
 #include "binding.h"
 #include "papi_util_impl.h"
 #include "urcu_impl.h"
-//#include "eer_prcu_impl.h"
 #ifdef USE_DEBUGCOUNTERS
     #include "debugcounters.h"
 #endif

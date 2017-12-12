@@ -1,11 +1,19 @@
 /* 
- * File:   rq_snapcollector.h
- * Author: trbot
- *
  * Created on April 20, 2017, 1:03 PM
  * 
- * Implementation of Erez Petrank and Shahar Timnat's Iterator algorithm.
+ * This is an implementation of the linearizable Snap Collector object,
+ * which was introduced by Petrank and Timnat at DISC 2015 in the paper
+ * "Lock-free Data Structure Iterators".
  * 
+ * Author: Trevor Brown
+ * 
+ * This C++ implementation is based on the Java implementation by Shahar Timnat.
+ * Of course, this version has to perform memory reclamation manually,
+ * whereas the original used automatic garbage collection.
+ * (This was particularly tricky when it came to reclaiming reports added to
+ *  the Snap Collector after report "blocker" objects.)
+ * Memory is reclaimed using DEBRA: distributed epoch-based reclamation.
+ *
  * WARNING:
  * 1. This algorithm ONLY supports data structures with logical deletion.
  * 2. It only supports data structures where each node contains ONE key.

@@ -1,6 +1,17 @@
 /* 
- * File:   rq_htm_rwlock.h
- * Author: trbot
+ * This is a hardware-transactional memory based implementation of the
+ * range query technique introduced in the paper
+ * "Harnessing Epoch-based Reclamation for Efficient Range Queries"
+ * by Maya Arbel-Raviv and Trevor Brown (PPoPP 2018).
+ * 
+ * It uses a global time stamp that is protected by a global lock that can be
+ * acquired either in exclusive mode or shared mode.
+ * Range queries acquire the lock in exclusive mode and increment the time stamp.
+ * Update operations acquire the lock in shared mode, then read the time stamp
+ * and perform the update.
+ * HTM is used to elide the shared-mode lock acquisition, accelerating updates.
+ * 
+ * Author: Trevor Brown and Maya Arbel-Raviv
  *
  * Created on April 20, 2017, 1:03 PM
  */

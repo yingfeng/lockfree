@@ -36,12 +36,6 @@
 using namespace std;
 using namespace urcu;
 
-static bool pred(predicate_info info, uint64_t val1, uint64_t val2){
-    assert(info->min_key <= info->max_key); 
-    assert(val1 <= val2);
-    return (info->min_key <= val2 && val1 <= info->max_key );
-}
-
 template <typename K, typename V, class RecManager>
 nodeptr citrustree<K,V,RecManager>::newNode(const int tid, K key, V value) {
     nodeptr nnode = recordmgr->template allocate<node_t<K,V> >(tid);
@@ -116,7 +110,7 @@ citrustree<K,V,RecManager>::~citrustree() {
 template <typename K, typename V, class RecManager>
 const pair<V, bool> citrustree<K,V,RecManager>::find(const int tid, const K& key) {
     recordmgr->leaveQuiescentState(tid, true);
-    readLock(key,key);
+    readLock();
     nodeptr curr = rqProvider->read_addr(tid, &root->child[0]);
     K ckey = curr->key;
     while (curr != NULL && ckey != key) {
@@ -180,11 +174,10 @@ const V citrustree<K,V,RecManager>::doInsert(const int tid, const K& key, const 
     K ckey;
     int tag;
     
-    // TODO: verify that the linearization points are correct
     
 retry:
     recordmgr->leaveQuiescentState(tid);
-    readLock(key,key);
+    readLock();
     SEARCH;
     tag = prev->tag[direction];
     readUnlock();
@@ -192,7 +185,6 @@ retry:
         if (onlyIfAbsent) {
             V result = curr->value;
             recordmgr->enterQuiescentState(tid);
-            //cout<<"NO_VALUE="<<NO_VALUE<<endl;
             assert(result != NO_VALUE);
             return result;
         } else {
@@ -264,13 +256,10 @@ const pair<V, bool> citrustree<K,V,RecManager>::erase(const int tid, const K& ke
     nodeptr nnode;
     
     int min_bucket;
-    predicate_info_t pred_info;
-    
-    // TODO: verify that the linearization points are correct
-    
+        
 retry:
     recordmgr->leaveQuiescentState(tid);
-    readLock(key,key);
+    readLock();
     SEARCH;
     readUnlock();
     if (curr == NULL) {
@@ -346,8 +335,7 @@ retry:
         nodeptr deletedNodes[] = {curr, succ, NULL};
         rqProvider->linearize_update_at_write(tid, &prev->child[direction], nnode, insertedNodes, deletedNodes);
         
-        struct predicate_info_t pred_info = {.min_key = (uint64_t) key,.max_key = (uint64_t) succ->key};
-        synchronize(pred, &pred_info);
+        synchronize();
 
         succ->marked = true;
         if (prevSucc == curr) {
@@ -384,7 +372,6 @@ template <typename K, typename V, class RecManager>
 int citrustree<K,V,RecManager>::rangeQuery(const int tid, const K& lo, const K& hi, K * const resultKeys, V * const resultValues) {
     block<node_t<K,V> > stack (NULL);
     recordmgr->leaveQuiescentState(tid, true);
-    //readLock(lo,hi);
     rqProvider->traversal_start(tid);
     
     // depth first traversal (of interesting subtrees)
@@ -410,7 +397,6 @@ int citrustree<K,V,RecManager>::rangeQuery(const int tid, const K& lo, const K& 
         }
     }
     rqProvider->traversal_end(tid, resultKeys, resultValues, &size, lo, hi);
-    //readUnlock();
     recordmgr->enterQuiescentState(tid);
     return size;
 }

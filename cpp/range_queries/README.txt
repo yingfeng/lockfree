@@ -65,25 +65,32 @@ Two benchmarks are included: microbench and macrobench.
       We implemented real support for range queries, and replaced the original
       index with several of our data structure implementations.
 
-We also provide scripts to generate many experiments from the paper. Usage:
-Microbench:
-    - cd microbench
-      make -j
-      ./runscript.sh
-      ./create_db.py
-      ./graphs.py
-Macrobench:
-    - cd macrobench
-      ./compile.sh
-      ./runscript.sh
-      ./makecsv.sh
+Prerequisites:
+    - Multicore system (preferably w/at least 16 h/w threads)
+      Memory model: total store order (modern Intel/AMD/Oracle processors)
+    - Recent Linux (tested on Ubuntu 14.04 LTS)
+    - For HTM results, an Intel system with TSX support is needed
+      (On other systems, the benchmarks will run, but data will not
+       be produced for the HTM-based algorithms.)
+    - Python 2.7+ (NOT 3.x)
+      with libraries: numpy 1.12+, matplotlib 2.1+, pandas 0.13.1+
+    - GCC 4.8+
+    - Make
 
-Compiling:
-    1. Edit microbench/Makefile and macrobench/Makefile
-       to appropriately set the PLAF variable on line 1.
-    2. cd microbench/Makefile ; ./compile.sh
-    3. cd macrobench/Makefile ; ./compile.sh
-
+Usage:
+    1. Edit config.mk, following the instructions therein.
+    2. Microbench:
+       cd microbench
+       make -j
+       ./runscript.sh
+       python graphs.py
+    3. Macrobench:
+       cd macrobench
+       ./compile.sh
+       ./runscript.sh
+       ./makecsv.sh > dbx.csv
+       python graph.py
+       
 Compilation yields the following binaries:
 
   [[Microbenchmark]] ./microbench/*.out

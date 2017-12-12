@@ -1,6 +1,10 @@
 /* 
- * File:   rq_unsafe.h
- * Author: trbot
+ * This is a naive single-collect range query implementation.
+ * Range queries in this algorithm are NOT atomic.
+ * This is included simply to serve as an extremely optimistic upper bound
+ * on the performance of any range query technique.
+ * 
+ * Author: Trevor Brown
  *
  * Created on May 15, 2017, 5:06 PM
  */
